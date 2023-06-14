@@ -1,9 +1,10 @@
-from PyQt5.QtCore import QPropertyAnimation, QEasingCurve, QPoint, QEvent
+from PyQt5.QtCore import QPropertyAnimation, QEasingCurve, QPoint, QEvent, QObject
 
 
 class CardSlideAnimation:
 
     def __init__(self, delta, group_animation):
+        #super().__init__()
         self.delta = delta
         self.group_animation = group_animation
 

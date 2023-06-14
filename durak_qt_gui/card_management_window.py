@@ -36,6 +36,8 @@ class CardManagementWindow(QWidget):
                 probability = probs_array[suit_index, rank_index]
                 label = CardLabel(self, suit_index, rank_value, self.cards_images,
                                   self.cards_images["shirt"].scaled(card_scale), probability)
+                label.installEventFilter(self)
+                label.installEventFilter(self.animation_event_filter)
                 self.cards_labels[suit_index][rank_value] = label
                 self.grid_layout.addWidget(label, suit_index, rank_index)
 

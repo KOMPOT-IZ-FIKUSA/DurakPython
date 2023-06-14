@@ -12,7 +12,6 @@ class CardLabel(QLabel):
         self.card_pixmap = loaded_cards_images[suit_i][rank_absolute]
         self.shirt_pixmap = shirt_pixmap
         self.setPixmap(self.card_pixmap)
-        self.installEventFilter(window)
         self.setAlignment(Qt.AlignCenter)
         self._initial_y = None
 
@@ -61,6 +60,7 @@ class CardLabel(QLabel):
 
     def paintEvent(self, a0: QPaintEvent) -> None:
         # super().paintEvent(a0)
+        print(self.initial_y)
         painter = QPainter(self)
         if self.probability < 0.0001:
             painter.drawPixmap(self.rect(), self.shirt_pixmap)
