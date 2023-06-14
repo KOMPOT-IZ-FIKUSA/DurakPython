@@ -2,25 +2,23 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QPropertyAnimation, QEasingCurve, QPoint, QEvent
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGridLayout, QHBoxLayout, QPushButton
 
+from card_index import Index
 from durak_qt_gui.card_slide_animation import CardSlideAnimation
 from game_data import DurakData
 from durak_qt_gui.card_label_widget import CardLabel
-from qt_image_loader import load_cards
 
 
 class CardManagementWindow(QWidget):
-    cards_images = None
 
     def __init__(self, min_rank, game_data: DurakData, player_pos: int):
         super().__init__()
         ranks_count = 15 - min_rank
+        self.card_scale = (128, 168)
         self.group_animation = QtCore.QParallelAnimationGroup()
         self.animation_event_filter = CardSlideAnimation(self, 20, self.group_animation)
         self.game_data = game_data
         self.min_rank = min_rank
         self.ranks_count = ranks_count
-        if self.cards_images is None:
-            self.cards_images = load_cards()
 
         self.set_up_layouts()
         self.cards_labels = {}
@@ -34,7 +32,6 @@ class CardManagementWindow(QWidget):
         self.setFixedHeight(800)
         self.main_vertical_layout = QVBoxLayout(self)
         self.grid_layout = QGridLayout(self)
-        self.card_scale = list(self.cards_images[0].items())[0][1].size()
         self.horizontal_layout = QHBoxLayout(self)
         self.main_vertical_layout.addLayout(self.grid_layout)
         self.main_vertical_layout.addLayout(self.horizontal_layout)
@@ -51,9 +48,9 @@ class CardManagementWindow(QWidget):
             self.cards_labels[suit_index] = {}
             for rank_index in range(self.ranks_count):
                 rank_value = rank_index + self.min_rank
+                card = Index(suit_index, rank_value, self.min_rank)
                 probability = probs_array[suit_index, rank_index]
-                label = CardLabel(self, suit_index, rank_value, self.cards_images,
-                                  self.cards_images["shirt"].scaled(self.card_scale), probability)
+                label = CardLabel(self, card, probability)
                 label.installEventFilter(self)
                 label.installEventFilter(self.animation_event_filter)
                 self.cards_labels[suit_index][rank_value] = label
