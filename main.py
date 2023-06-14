@@ -27,10 +27,10 @@ def test_cards_layout():
     class TestWindow(QWidget):
         def __init__(self):
             super().__init__()
-            self.setFixedSize(256, 256)
             self.cards_layout = QGridLayout(self)
             self.setLayout(self.cards_layout)
-            self.cards_layout.addWidget(CardLabel(self, Index(0, 6, 6), 1), 0, 0)
+            self.cards_layout.addWidget(CardLabel(self, Index(0, 6, 6), 1))
+
             # self.cards_layout.add_card(Index(0, 6, 6))
             # self.cards_layout.add_card(Index(1, 6, 6))
             # self.cards_layout.add_card(Index(2, 6, 6))
@@ -42,7 +42,7 @@ def test_cards_layout():
     sys.exit(app.exec_())
 
 if __name__ == "__main__":
-    test_cards_layout()
+    test_card_manager()
 
     app = QApplication([])
     #w = MainWindow()

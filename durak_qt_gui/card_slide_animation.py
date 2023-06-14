@@ -9,7 +9,6 @@ class CardSlideAnimation(QObject):
         self.group_animation = group_animation
 
     def _card_y_animation(self, card, delta):
-        pass
         self.animation = QPropertyAnimation(card, b'pos')
         self.animation.setDuration(600)
         self.animation.setEasingCurve(QEasingCurve.OutBounce)

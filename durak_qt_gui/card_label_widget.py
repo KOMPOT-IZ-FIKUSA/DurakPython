@@ -1,32 +1,37 @@
 import math
+import os
+import time
 
+from PyQt5 import QtSvg
 from PyQt5.QtCore import Qt, QRect
-from PyQt5.QtGui import QPaintEvent, QPainter, QBrush, QColor, QFont
-from PyQt5.QtWidgets import QLabel
+from PyQt5.QtGui import QPaintEvent, QPainter, QBrush, QColor, QFont, QPicture
+from PyQt5.QtSvg import QSvgWidget
+from PyQt5.QtWidgets import QLabel, QGraphicsProxyWidget
 
+import const
 from card_index import Index
 from qt_image_loader import load_cards
 
 
 class CardLabel(QLabel):
-    cards_images = None
+    shirt_svg_renderer = None
+    shirt_svg_path = "data\\cards_svg\\shirt.svg"
 
     def __init__(self, window, card: Index, initial_probability: float):
-        super(CardLabel, self).__init__(window)
-        if self.cards_images is None:
-            self.cards_images = load_cards()
+        super().__init__(window)
+        suit_name = const.suit_names_for_java[const.suits[card.suit_i]].lower()
+        rank_name = const.ranks_value_to_string[card.absolute]
+        svg_path = os.path.join("data\\cards_svg", f"{suit_name}_{rank_name}.svg")
 
-        self.card = card
-        self.card_pixmap = self.cards_images[card.suit_i][card.absolute]
-        self.shirt_pixmap = self.cards_images["shirt"]
-        self.setAlignment(Qt.AlignCenter)
+        self.card_svg_renderer = QtSvg.QSvgRenderer(svg_path)
+        if self.shirt_svg_renderer is None:
+            self.shirt_svg_renderer = QtSvg.QSvgRenderer(self.shirt_svg_path)
+
         self._initial_y = None
-
         self.initial_probability = initial_probability
         self._probability = self.initial_probability
         self._left_clicked = False
         self._right_clicked = False
-
         self._pixmap = None
 
 
@@ -68,15 +73,13 @@ class CardLabel(QLabel):
         super().paintEvent(a0)
         painter = QPainter(self)
         if self.probability < 0.0001:
-            painter.drawPixmap(self.rect(), self.shirt_pixmap)
+            self.shirt_svg_renderer.render(painter)
         else:
-            painter.drawPixmap(self.rect(), self.card_pixmap)
-
+            self.card_svg_renderer.render(painter)
             k = min(self.width(), self.height() * 168 / 128)
-            width = k * 0.6
-            height = k * 0.2
-            font_size = k / 6
-            print(k)
+            width = k * 0.65
+            height = k * 0.25
+            font_size = k * 0.2
             rect = QRect(self.width() / 2 - width / 2, self.height() / 2 - height / 2, width, height)
             painter.fillRect(rect, QBrush(QColor("white")))
             painter.setPen(QColor("black"))
