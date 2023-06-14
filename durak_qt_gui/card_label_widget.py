@@ -4,8 +4,10 @@ from PyQt5.QtCore import Qt, QRect
 from PyQt5.QtGui import QPaintEvent, QPainter, QBrush, QColor, QFont
 from PyQt5.QtWidgets import QLabel
 
+from durak_qt_gui.card_slide_animation import CardSlideAnimation
 
-class CardLabel(QLabel):
+
+class CardLabel(QLabel, CardSlideAnimation):
     def __init__(self, window, suit_i: int, rank_absolute: int, loaded_cards_images: dict, shirt_pixmap,
                  initial_probability: float):
         super(CardLabel, self).__init__(window)
