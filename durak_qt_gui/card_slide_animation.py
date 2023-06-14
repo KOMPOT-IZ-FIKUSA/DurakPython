@@ -1,14 +1,15 @@
 from PyQt5.QtCore import QPropertyAnimation, QEasingCurve, QPoint, QEvent, QObject
 
 
-class CardSlideAnimation:
+class CardSlideAnimation(QObject):
 
-    def __init__(self, delta, group_animation):
-        #super().__init__()
+    def __init__(self, window, delta, group_animation):
+        super().__init__(window)
         self.delta = delta
         self.group_animation = group_animation
 
     def _card_y_animation(self, card, delta):
+        pass
         self.animation = QPropertyAnimation(card, b'pos')
         self.animation.setDuration(600)
         self.animation.setEasingCurve(QEasingCurve.OutBounce)
@@ -17,9 +18,9 @@ class CardSlideAnimation:
         return self.animation
 
     def eventFilter(self, object, event):
-        assert hasattr(object, "initial_y")
         if event.type() == QEvent.Enter:
             self.group_animation.addAnimation(self._card_y_animation(object, -self.delta))
         elif event.type() == QEvent.Leave:
             self.group_animation.addAnimation(self._card_y_animation(object, 0))
         return False
+

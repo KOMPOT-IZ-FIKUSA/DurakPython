@@ -13,36 +13,29 @@ class CardManagementWindow(QWidget):
 
     def __init__(self, min_rank, game_data: DurakData, player_pos: int):
         super().__init__()
-        self.group_animation = QtCore.QParallelAnimationGroup()
-        self.animation_event_filter = CardSlideAnimation(20, self.group_animation)
-
-        self.game_data = game_data
         ranks_count = 15 - min_rank
+        self.group_animation = QtCore.QParallelAnimationGroup()
+        self.animation_event_filter = CardSlideAnimation(self, 20, self.group_animation)
+        self.game_data = game_data
+        self.min_rank = min_rank
+        self.ranks_count = ranks_count
         if self.cards_images is None:
             self.cards_images = load_cards()
-        card_scale = list(self.cards_images[0].items())[0][1].size()
 
+        self.set_up_layouts()
+        self.cards_labels = {}
+        self.set_up_cards(game_data.players[player_pos].probs_container.probs)
+
+        self.show()
+
+    def set_up_layouts(self):
         self.setWindowTitle("Card Manager")
-        self.setFixedWidth(136 * ranks_count)
+        self.setFixedWidth(136 * self.ranks_count)
         self.setFixedHeight(800)
         self.main_vertical_layout = QVBoxLayout(self)
         self.grid_layout = QGridLayout(self)
-        probs_array = game_data.players[player_pos].probs_container.probs
-        self.cards_labels = {}
-        for suit_index in range(4):
-            self.cards_labels[suit_index] = {}
-            for rank_index in range(ranks_count):
-                rank_value = rank_index + min_rank
-                probability = probs_array[suit_index, rank_index]
-                label = CardLabel(self, suit_index, rank_value, self.cards_images,
-                                  self.cards_images["shirt"].scaled(card_scale), probability)
-                label.installEventFilter(self)
-                label.installEventFilter(self.animation_event_filter)
-                self.cards_labels[suit_index][rank_value] = label
-                self.grid_layout.addWidget(label, suit_index, rank_index)
-
+        self.card_scale = list(self.cards_images[0].items())[0][1].size()
         self.horizontal_layout = QHBoxLayout(self)
-
         self.main_vertical_layout.addLayout(self.grid_layout)
         self.main_vertical_layout.addLayout(self.horizontal_layout)
         self.confirm_button = QPushButton(self)
@@ -52,10 +45,19 @@ class CardManagementWindow(QWidget):
         self.confirm_button.clicked.connect(self.on_confirm_button_clicked)
         self.main_vertical_layout.addWidget(self.confirm_button)
         self.setLayout(self.main_vertical_layout)
-        self.show()
 
-    def set_up_cards(self):
-        pass
+    def set_up_cards(self, probs_array):
+        for suit_index in range(4):
+            self.cards_labels[suit_index] = {}
+            for rank_index in range(self.ranks_count):
+                rank_value = rank_index + self.min_rank
+                probability = probs_array[suit_index, rank_index]
+                label = CardLabel(self, suit_index, rank_value, self.cards_images,
+                                  self.cards_images["shirt"].scaled(self.card_scale), probability)
+                label.installEventFilter(self)
+                label.installEventFilter(self.animation_event_filter)
+                self.cards_labels[suit_index][rank_value] = label
+                self.grid_layout.addWidget(label, suit_index, rank_index)
 
     def eventFilter(self, object, event):
         if isinstance(object, CardLabel):
