@@ -1,16 +1,13 @@
 import math
 import os
-import time
 
 from PyQt5 import QtSvg
 from PyQt5.QtCore import Qt, QRect
-from PyQt5.QtGui import QPaintEvent, QPainter, QBrush, QColor, QFont, QPicture
-from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtWidgets import QLabel, QGraphicsProxyWidget
+from PyQt5.QtGui import QPaintEvent, QPainter, QBrush, QColor, QFont
+from PyQt5.QtWidgets import QLabel
 
 import const
 from card_index import Index
-from qt_image_loader import load_cards
 
 
 class CardLabel(QLabel):
@@ -27,13 +24,13 @@ class CardLabel(QLabel):
         if self.shirt_svg_renderer is None:
             self.shirt_svg_renderer = QtSvg.QSvgRenderer(self.shirt_svg_path)
 
+        self.card = card
         self._initial_y = None
         self.initial_probability = initial_probability
         self._probability = self.initial_probability
         self._left_clicked = False
         self._right_clicked = False
         self._pixmap = None
-
 
     def click_left(self):
         if self._left_clicked:
@@ -77,18 +74,19 @@ class CardLabel(QLabel):
         else:
             self.card_svg_renderer.render(painter)
             k = min(self.width(), self.height() * 168 / 128)
-            width = k * 0.65
-            height = k * 0.25
-            font_size = k * 0.2
-            rect = QRect(self.width() / 2 - width / 2, self.height() / 2 - height / 2, width, height)
-            painter.fillRect(rect, QBrush(QColor("white")))
-            painter.setPen(QColor("black"))
-            font = QFont("Arial", font_size)
-            font.setBold(True)
-            painter.setFont(font)
-            percentage = f"{math.floor(self.probability * 100)}%"
-            painter.drawText(rect, Qt.AlignCenter, percentage)
-            painter.setPen(QColor("white"))
+            if 0.0001 < self.probability < 0.9999:
+                width = k * 0.65
+                height = k * 0.25
+                font_size = k * 0.2
+                rect = QRect(self.width() / 2 - width / 2, self.height() / 2 - height / 2, width, height)
+                painter.fillRect(rect, QBrush(QColor("white")))
+                painter.setPen(QColor("black"))
+                font = QFont("Arial", font_size)
+                font.setBold(True)
+                painter.setFont(font)
+                percentage = f"{math.floor(self.probability * 100)}%"
+                painter.drawText(rect, Qt.AlignCenter, percentage)
+                painter.setPen(QColor("white"))
 
     def enable_blue_frame(self):
         self.setStyleSheet("border: 3px solid blue;")

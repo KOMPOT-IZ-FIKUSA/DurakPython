@@ -124,8 +124,10 @@ class DurakSniffer:
 
 
     def handle_client_packet(self, bytes_: bytes):
-        self.some_test()
-
+        try:
+            self.some_test()
+        except Exception as e:
+            log.error(e)
 
         self.recv_buf.write_bytes(bytes_)
         packet_str = self.recv_buf.read_packet()
@@ -139,6 +141,7 @@ class DurakSniffer:
         name0 = None
         while len(dicts) > 0:
             d = dicts[0]
+
             name0 = name0 or d.name
             handled = True
             if d.name == "game":
@@ -197,8 +200,7 @@ class DurakSniffer:
                 player = self.get_player_global_data(d)
                 pass
             elif d.name == "player_pos":
-                #print(d)
-                #self.game.handle_event(events.SwapPlayers())
+                self.game.handle_event(events.MoveSelfToPos(d["id"]))
                 pass
             elif d.name == "end_turn":
                 self.game.handle_event(events.EndTurn(d.get("id")))
@@ -277,17 +279,25 @@ class DurakSniffer:
                 pass
             elif d.name == "game_ready":
                 pass
+            elif d.name == "player_swap":
+                pass
             elif d.name == "smile":
                 pass
             else:
                 handled = False
             if handled or not d.name:
+
+                print(d)
+                if self.game is not None and self.game.properties is not None:
+                    pass
+
                 if not d.name:
                     error("packet name error", name0, d)
                 dicts.pop(0)
                 name0 = None
             else:
                 d.name = d.name[1:]
+
 
     def handle_hand_packet(self, d: NamedDict):
         hand_cards = d["cards"]
@@ -318,7 +328,7 @@ class DurakSniffer:
             packet_str = self.send_buf.read_packet()
 
         for d in dicts:
-            if d.name == "t":
+            if d.name == "t" or d.name == "f":
                 card = self.card_from_string(d["c"])
                 self.game.handle_event(events.Attack(self.game.properties.self_position, card))
             elif d.name == "b":

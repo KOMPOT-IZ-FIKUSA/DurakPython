@@ -7,7 +7,7 @@ import log
 from card_index import Index
 from events import GameStart, SetTrumpCard, SetTrumpSuit, Attack, SetModes, Defence, Redirect, EndTurn, Hand, \
     TakeFromDeckOrder, AttackCanceled, RedirectCanceled, DefenceCanceled, GameReset, SetGameProperties, \
-    ShaperBack
+    ShaperBack, MoveSelfToPos
 from game_data import DurakData
 from game_properties import GameProperties
 from player_data import GlobalPlayerData
@@ -98,6 +98,9 @@ class Durak:
             self.hand_event_in_queue = None
             self.player_modes = None
             self.data = None
+
+        elif isinstance(event, MoveSelfToPos):
+            self.properties.self_position = event.pos
 
         elif isinstance(event, ShaperBack):
             self.handle_shaper_back(event.cards_to_players)

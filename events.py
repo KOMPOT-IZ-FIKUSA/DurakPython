@@ -55,9 +55,8 @@ class SetTrumpSuit:
 
 
 @dataclass
-class SwapPlayers:
-    player_id1: int
-    player_id2: int
+class MoveSelfToPos:
+    pos: int
 
 
 @dataclass

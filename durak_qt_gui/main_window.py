@@ -1,3 +1,4 @@
+import random
 import time
 
 from PyQt5 import QtCore, QtWidgets
@@ -13,7 +14,7 @@ from durak_qt_gui.signal_handler import SignalHandler
 from player_data import GlobalPlayerData
 
 
-class MainWindow(QWidget):
+class DurakMainWindow(QWidget):
     signal = QtCore.pyqtSignal()
 
     def __init__(self):
@@ -26,7 +27,9 @@ class MainWindow(QWidget):
 
         backround_rect = QtWidgets.QLabel("", self)
         backround_rect.setFixedSize(self.size())
-        backround_rect.setStyleSheet("background-color: #000")
+        backround_rect.setStyleSheet("background-color: #000;")
+
+
 
         self.signal_handler = SignalHandler(self.signal)
 
@@ -35,17 +38,21 @@ class MainWindow(QWidget):
         self.sniffer = DurakSniffer()
         self.sniffer.game.add_event_handler(self.on_game_event)
 
-        for pos in PLAYERS_LAYOUT_SETTINGS[6].setting:
-            player = self.create_player_gui(*pos, GlobalPlayerData(0, "Player", 0, 0, None))
-            player.add_card(Index(0, 6, 6))
-            player.add_card(Index(1, 6, 6))
-            player.add_card(Index(2, 6, 6))
-            player.add_card(Index(3, 6, 6))
-            player.add_card(Index(2, 7, 6))
-            player.add_card(Index(3, 7, 6))
-            player.add_card(Index(3, 8, 6))
-            player.add_card(Index(3, 9, 6))
-            player.add_card(Index(3, 10, 6))
+        #random.seed(2)
+        #for pos in PLAYERS_LAYOUT_SETTINGS[6].setting:
+        #    player = self.create_player_gui(*pos, GlobalPlayerData(0, "Player", 0, 0, None))
+        #    cards = [
+        #        Index(0, 6, 6),
+        #        Index(1, 6, 6),
+        #        Index(0, 7, 6),
+        #        Index(1, 7, 6),
+        #        Index(0, 8, 6),
+        #        Index(1, 8, 6),
+        #        Index(0, 9, 6),
+        #        Index(1, 9, 6),
+        #    ]
+        #    for i in range(0, random.randint(0, len(cards))):
+        #        player.add_card(cards[i])
 
 
         self.show()
@@ -56,8 +63,10 @@ class MainWindow(QWidget):
     def create_player_gui(self, column, row, player: GlobalPlayerData):
         gui = PlayerGui(self, player)
         pos = (column, row)
-        self.grid_layout.addLayout(gui.main_vertical_layout, row, column)
+        self.grid_layout.addWidget(gui.container, row, column)
         self.player_guis[pos] = gui
+        self.grid_layout.setColumnStretch(column, 1000)
+        self.grid_layout.setRowStretch(row, 1000)
         return gui
 
     def close_all_player_guis(self):
@@ -99,30 +108,16 @@ class MainWindow(QWidget):
             ranks_count = 15 - min_rank
             for player_index in range(game.properties.players_count):
                 player_cards_container = game.data.players[player_index].probs_container
-                red_cards_strings = []
-                black_cards_strings = []
+                red_cards = []
+                black_cards = []
                 for suit_index, suit in enumerate(const.suits):
-                    ranks = [min_rank + i for i in range(ranks_count) if
-                             player_cards_container.probs[suit_index, i] > 0.9999]
-                    ranks.sort()
-                    cards_strings = [const.ranks_value_to_string[rank] + suit for rank in ranks]
-                    red = "♥♦"
-                    if suit in red:
-                        red_cards_strings += cards_strings
+                    cards = [Index(suit_index, i + min_rank, min_rank) for i in range(ranks_count) if player_cards_container.probs[suit_index, i] > 0.9999]
+                    if suit_index in const.red_suits_indices:
+                        red_cards += cards
                     else:
-                        black_cards_strings += cards_strings
+                        black_cards += cards
 
-                def compose_cards_to_final_string(cards_strings):
-                    res = ""
-                    for i, c in enumerate(cards_strings):
-                        if i % 6 == 0 and i != 0:
-                            res += "\n"
-                        res += " " + c
-                    return res
-
-                red_cards_final_string = compose_cards_to_final_string(red_cards_strings)
-                black_cards_final_string = compose_cards_to_final_string(black_cards_strings)
                 setting = PLAYERS_LAYOUT_SETTINGS[players_count]
                 gui = self.player_guis[setting.setting[player_index]]
-                gui.red_cards.setText(red_cards_final_string)
-                gui.black_cards.setText(black_cards_final_string)
+                gui.red_cards.set_cards(red_cards)
+                gui.black_cards.set_cards(black_cards)

@@ -1,8 +1,13 @@
-from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtWidgets import QHBoxLayout
+from typing import List
 
+from PyQt5 import QtCore
+from PyQt5.QtCore import Qt, QSize, QParallelAnimationGroup, QRect
+from PyQt5.QtWidgets import QHBoxLayout, QSizePolicy
+
+import log
 from card_index import Index
 from durak_qt_gui.card_label_widget import CardLabel
+from durak_qt_gui.card_slide_animation import CardSlideAnimation
 
 
 class CardsListLayout(QHBoxLayout):
@@ -11,13 +16,16 @@ class CardsListLayout(QHBoxLayout):
         self.cards = []
         self.window = window
         self.setAlignment(Qt.AlignCenter)
-
+        self.setSpacing(0)
+        self.setContentsMargins(0, 0, 40, 0)
+        self.group_animation = QParallelAnimationGroup()
+        self.animation_event_filter = CardSlideAnimation(self, 20, self.group_animation)
 
 
     def __contains__(self, item):
         for card in self.cards:
             if isinstance(item, CardLabel):
-                if card == item:
+                if card.card == item.card:
                     return True
             elif isinstance(item, Index):
                 if card.card == item:
@@ -26,15 +34,55 @@ class CardsListLayout(QHBoxLayout):
                 return False
         return False
 
-    def add_card(self, card: Index):
+    def fix_cards_proportions(self):
+        for card in self.cards:
+            card.setFixedWidth(card.height() * 128/168)
+
+
+    def setGeometry(self, a0: QtCore.QRect) -> None:
+        super().setGeometry(a0)
+        self.fix_cards_proportions()
+
+    def update(self) -> None:
+        self.fix_cards_proportions()
+        super().update()
+
+    def add_card(self, card: Index, side="left"):
         if card in self:
             return
         label = CardLabel(self.window, card, 1)
-        label.setFixedSize(QSize(128, 168))
+        label.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
+        label.installEventFilter(self.animation_event_filter)
+        if side == "right":
+            self.addWidget(label)
+            self.cards.append(label)
+        elif side == "left":
+            self.addWidget(label)
+            self.cards.insert(0, label)
+        else:
+            log.error("cards_list_layout", "add_card", "invalid side", side=side)
 
-        label.enable_blue_frame()
+    def remove_card(self, card: Index):
+        if card not in self:
+            return
+        for card_label in self.cards:
+            card_label: CardLabel
+            if card_label.card == card:
+                break
+        self.cards.remove(card_label)
+        card_label.setParent(None)
+        card_label.deleteLater()
+        self.removeWidget(card_label)
 
-        self.addWidget(label)
-        self.cards.append(label)
-
-
+    def set_cards(self, cards: List[Index]):
+        for card in cards:
+            if len(self.cards) == 0 or self.cards[0].card.suit_i == card.suit_i:
+                self.add_card(card, "left")
+            else:
+                self.add_card(card, "right")
+        to_remove = []
+        for label in self.cards:
+            if label.card not in cards:
+                to_remove.append(label.card)
+        for card in to_remove:
+            self.remove_card(card)

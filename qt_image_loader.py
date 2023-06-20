@@ -1,13 +1,10 @@
 import os.path
 from functools import lru_cache
 
-import PIL.Image as Image
-import PIL.ImageQt as ImageQt
-import cv2
-from PyQt5.QtGui import QPixmap
-import const
-from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.Qt import *
+
+import const
+
 
 @lru_cache(None)
 def load_cards() -> dict:
