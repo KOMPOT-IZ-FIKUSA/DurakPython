@@ -19,9 +19,11 @@ class ProbabilityContainer:
         if self.cards < 0.00001:
             s = 0
             for index, value in indices_and_values:
+                self.probs[index.suit_i, index.rank_i] = value
                 s += value
             if s > 0.00001:
                 log.error("trying to set non-zero probabilities to zero-card container", indices_and_values)
+            self.cards = round(np.sum(self.probs))
             return
         delta = 0
         mask = np.where(self.probs < 0.99999, 1, 0)
@@ -33,6 +35,9 @@ class ProbabilityContainer:
         if s1 > 0.00001:
             k = (self.cards - np.sum(self.probs[mask == 0])) / s1
             self.probs[mask == 1] = self.probs[mask == 1] * k
+
+        self.cards = round(np.sum(self.probs))
+
 
     def copy(self):
         return ProbabilityContainer(self.probs.shape[1], self.probs.copy())

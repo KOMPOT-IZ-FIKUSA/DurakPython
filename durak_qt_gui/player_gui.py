@@ -15,10 +15,10 @@ from qt_image_loader import load_cards
 
 
 class PlayerGui:
-    def __init__(self, window, player):
-
+    def __init__(self, window, player, enter_card_edit_mode):
         self.container = QLabel()
         self.container.setStyleSheet("background-color: #ccc")
+
 
         self.window = window
         self.main_vertical_layout = QVBoxLayout(self.container)
@@ -58,6 +58,16 @@ class PlayerGui:
                     log.error("player gui init", "try_load_image", e, player=player)
 
         threading.Thread(target=try_load_image).start()
+
+        self.management_window: QWidget = None
+        def call_cards_management_safely(a0):
+            if self.management_window is None:
+                self.management_window = enter_card_edit_mode()
+                self.management_window.show()
+                def on_close(a0):
+                    self.management_window = None
+                self.management_window.closeEvent = on_close
+        self.container.mouseReleaseEvent = call_cards_management_safely
 
     def close(self):
         self.name.deleteLater()

@@ -33,8 +33,6 @@ class Durak:
         return self.data is not None
 
     def handle_event(self, event):
-
-        print(event)
         if self.data is not None:
             for slot in self.data.attack_slots + self.data.defence_slots:
                 if slot.cards > 1:

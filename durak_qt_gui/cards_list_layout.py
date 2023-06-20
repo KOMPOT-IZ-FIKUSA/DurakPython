@@ -74,6 +74,7 @@ class CardsListLayout(QHBoxLayout):
         card_label.deleteLater()
         self.removeWidget(card_label)
 
+
     def set_cards(self, cards: List[Index]):
         for card in cards:
             if len(self.cards) == 0 or self.cards[0].card.suit_i == card.suit_i:
@@ -86,3 +87,4 @@ class CardsListLayout(QHBoxLayout):
                 to_remove.append(label.card)
         for card in to_remove:
             self.remove_card(card)
+        self.fix_cards_proportions()

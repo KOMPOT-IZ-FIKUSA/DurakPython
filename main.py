@@ -19,9 +19,27 @@ def test_card_manager():
     for i in range(6):
         game_data.move_card_from_deck_to_player(0)
         game_data.move_card_from_deck_to_player(1)
-    game_data.set_probability(game_data.players[0].probs_container, Index(0, 6, 6), 0)
+        pass
+    game_data.set_probability(game_data.players[0].probs_container, Index(0, 6, 6), 1)
+    game_data.set_probability(game_data.players[1].probs_container, Index(1, 6, 6), 1)
 
-    c = CardManagementWindow(6, game_data, 0)
+    print("Player 0:")
+    print(game_data.players[0].probs_container)
+
+    print("\nPlayer 1:")
+    print(game_data.players[1].probs_container)
+
+    print("\nDiscard:")
+    print(game_data.get_discard())
+
+    print("\nDeck:")
+    print(game_data._deck)
+
+    print("\nTrump:")
+    print(game_data._trump_card)
+
+
+    quit()
     sys.exit(app.exec_())
 
 
@@ -59,7 +77,7 @@ def test_cards_layout():
 
 if __name__ == "__main__":
 
-    #test_cards_layout()
+    #test_card_manager()
 
 
     app = QApplication([])

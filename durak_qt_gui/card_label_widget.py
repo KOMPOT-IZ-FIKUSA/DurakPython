@@ -1,14 +1,22 @@
+import enum
 import math
 import os
+import random
+import time
 
 from PyQt5 import QtSvg
-from PyQt5.QtCore import Qt, QRect
-from PyQt5.QtGui import QPaintEvent, QPainter, QBrush, QColor, QFont
+from PyQt5.QtCore import Qt, QRect, QSize, QRectF
+from PyQt5.QtGui import QPaintEvent, QPainter, QBrush, QColor, QFont, QPainterPath, QPen
 from PyQt5.QtWidgets import QLabel
 
 import const
 from card_index import Index
 
+
+class BackgroundColor(enum.Enum):
+    NONE = 0
+    RED = 1
+    GREEN = 2
 
 class CardLabel(QLabel):
     shirt_svg_renderer = None
@@ -31,6 +39,10 @@ class CardLabel(QLabel):
         self._left_clicked = False
         self._right_clicked = False
         self._pixmap = None
+        self.setAlignment(Qt.AlignCenter)
+        self.setStyleSheet("background-color: transparent;")
+
+        self.custom_background = BackgroundColor.NONE
 
     def click_left(self):
         if self._left_clicked:
@@ -87,6 +99,24 @@ class CardLabel(QLabel):
                 percentage = f"{math.floor(self.probability * 100)}%"
                 painter.drawText(rect, Qt.AlignCenter, percentage)
                 painter.setPen(QColor("white"))
+
+        if self.custom_background != BackgroundColor.NONE:
+            if self.custom_background == BackgroundColor.GREEN:
+                color = QColor(0, 153, 0, 120)
+            elif self.custom_background == BackgroundColor.RED:
+                color = QColor(248, 0, 0, 120)
+            painter.setRenderHint(QPainter.Antialiasing)
+            rect = self.rect()
+            width = rect.width() * 0.85
+            path = QPainterPath()
+            height = rect.height() * 0.9
+            rect = QRect(rect.center().x() - width / 2, rect.center().y() - height / 2, width, height)
+            rx = self.width() * 30 / 300
+            ry = self.height() * 30 / 400
+            path.addRoundedRect(QRectF(rect), rx, ry)
+            pen = QPen(color, 10)
+            painter.setPen(pen)
+            painter.fillPath(path, QBrush(color))
 
     def enable_blue_frame(self):
         self.setStyleSheet("border: 3px solid blue;")

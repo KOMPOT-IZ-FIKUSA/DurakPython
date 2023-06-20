@@ -21,6 +21,9 @@ class DurakData:
         self.attack_slots = [ProbContainer(self._ranks_count) for _ in range(6)]
         self.defence_slots = [ProbContainer(self._ranks_count) for _ in range(6)]
 
+    def get_min_card_rank(self):
+        return 15 - self._ranks_count
+
     def get_discard(self):
         return self._discard
 
@@ -46,6 +49,14 @@ class DurakData:
         if abs(p - value) < 0.000001:
             return
         container.set_probabilities(((index, value),))
+        if abs(p - 1) < 0.0001 and value < 0.0001:
+            for cont in self.iterate_over_containers():
+                if cont == self._discard:
+                    v = 1
+                else:
+                    v = 0
+                cont.set_probabilities(((index, v),))
+            return
         k = (1 - value) / (1 - p)
         for cont in self.iterate_over_containers():
             if cont == container:
