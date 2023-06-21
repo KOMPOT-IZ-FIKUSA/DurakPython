@@ -14,9 +14,11 @@ from card_index import Index
 
 
 class BackgroundColor(enum.Enum):
-    NONE = 0
-    RED = 1
-    GREEN = 2
+    NONE = lambda: QColor(0, 0, 0, 0)
+    RED = lambda: QColor(248, 0, 0, 120)
+    GREEN = lambda: QColor(0, 153, 0, 120)
+
+
 
 class CardLabel(QLabel):
     shirt_svg_renderer = None
@@ -89,7 +91,7 @@ class CardLabel(QLabel):
             self.shirt_svg_renderer.render(painter)
         else:
             self.card_svg_renderer.render(painter)
-            k = min(self.width(), self.height() * 168 / 128)
+            k = min(self.width() + 0., self.height() * 168 / 128)
             if 0.0001 < self.probability < 0.9999:
                 width = k * 0.65
                 height = k * 0.25
@@ -105,22 +107,22 @@ class CardLabel(QLabel):
                 painter.setPen(QColor("white"))
 
         if self.custom_background != BackgroundColor.NONE:
-            if self.custom_background == BackgroundColor.GREEN:
-                color = QColor(0, 153, 0, 120)
-            elif self.custom_background == BackgroundColor.RED:
-                color = QColor(248, 0, 0, 120)
+            color = self.custom_background()
             painter.setRenderHint(QPainter.Antialiasing)
-            rect = self.rect()
-            width = rect.width() * 0.85
-            path = QPainterPath()
-            height = rect.height() * 0.9
-            rect = QRect(rect.center().x() - width / 2, rect.center().y() - height / 2, width, height)
-            rx = self.width() * 30 / 300
-            ry = self.height() * 30 / 400
-            path.addRoundedRect(QRectF(rect), rx, ry)
-            pen = QPen(color, 10)
-            painter.setPen(pen)
+            painter.setPen(QPen(color, 10))
+            path = self._get_background_path()
             painter.fillPath(path, QBrush(color))
+
+    def _get_background_path(self):
+        rect = self.rect()
+        width = rect.width() * 0.85
+        path = QPainterPath()
+        height = rect.height() * 0.9
+        rect = QRect(rect.center().x() - width / 2, rect.center().y() - height / 2, width, height)
+        rx = self.width() * 30 / 300
+        ry = self.height() * 30 / 400
+        path.addRoundedRect(QRectF(rect), rx, ry)
+        return path
 
     def enable_blue_frame(self):
         self.setStyleSheet("border: 3px solid blue;")

@@ -32,9 +32,8 @@ class CardManagementWindow(QWidget):
 
         self.show()
 
-    def set_card_background_to_green_if_probability_is_different_from_initial(self, label: CardLabel):
-        initial = self.game_data.players[self.player_pos].probs_container.get(label.card)
-        if abs(label.probability - initial) > 0.0001:
+    def set_card_background_to_green_if_selected(self, label: CardLabel):
+        if label.selected:
             label.custom_background = card_label_widget.BackgroundColor.GREEN
         else:
             label.custom_background = card_label_widget.BackgroundColor.NONE
@@ -78,7 +77,7 @@ class CardManagementWindow(QWidget):
                     object.click_left()
                 elif button == 2:
                     object.click_right()
-                self.set_card_background_to_green_if_probability_is_different_from_initial(object)
+                self.set_card_background_to_green_if_selected(object)
         return False
 
 
@@ -95,6 +94,3 @@ class CardManagementWindow(QWidget):
             except Exception as e:
                 log.error(e, "CardManager", "on_confirm_button_clicked", index=index)
         self.close()
-
-        for container in self.game_data.iterate_over_containers():
-            print(container.cards, np.sum(container.probs))

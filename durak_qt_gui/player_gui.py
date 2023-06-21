@@ -38,8 +38,9 @@ class PlayerGui:
         self.main_vertical_layout.addLayout(self.name_and_icon_horizontal_layout)
         self.main_vertical_layout.addLayout(self.black_cards)
         self.main_vertical_layout.addLayout(self.red_cards)
-        self.main_vertical_layout.setStretch(1, 1000)
-        self.main_vertical_layout.setStretch(2, 1000)
+        self.main_vertical_layout.setStretch(0, 1)
+        self.main_vertical_layout.setStretch(1, 2)
+        self.main_vertical_layout.setStretch(2, 2)
 
         self.avatar = QLabel()
         self.avatar.setStyleSheet("color: #000; font-weight: bold; font-size: 30pt")
@@ -53,7 +54,7 @@ class PlayerGui:
                     image = QImage()
                     image.loadFromData(requests.get(player.avatar_link).content)
                     pixmap = QPixmap(image)
-                    self.avatar.setPixmap(pixmap.scaled(128, 128))
+                    self.avatar.setPixmap(pixmap.scaled(64, 64))
                 except Exception as e:
                     log.error("player gui init", "try_load_image", e, player=player)
 

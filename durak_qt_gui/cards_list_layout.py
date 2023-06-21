@@ -40,8 +40,8 @@ class CardsListLayout(QHBoxLayout):
 
 
     def setGeometry(self, a0: QtCore.QRect) -> None:
-        super().setGeometry(a0)
         self.fix_cards_proportions()
+        super().setGeometry(a0)
 
     def update(self) -> None:
         self.fix_cards_proportions()
