@@ -78,6 +78,10 @@ class CardLabel(QLabel):
             self._initial_y = self.y()
         return self._initial_y
 
+    @property
+    def selected(self):
+        return self._left_clicked or self._right_clicked
+
     def paintEvent(self, a0: QPaintEvent) -> None:
         super().paintEvent(a0)
         painter = QPainter(self)

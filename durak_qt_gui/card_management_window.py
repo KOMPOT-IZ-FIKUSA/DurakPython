@@ -87,7 +87,7 @@ class CardManagementWindow(QWidget):
         changes_queue = []
         for suit_index, ranks in self.cards_labels.items():
             for rank_index, label in ranks.items():
-                if abs(probs.get(label.card) - label.probability) > 0.0001:
+                if label.selected and abs(probs.get(label.card) - label.probability) > 0.0001:
                     changes_queue.append([label.card, label.probability])
         for index, value in changes_queue:
             try:
