@@ -78,6 +78,7 @@ class DurakMainWindow(QWidget):
 
     def close_all_player_guis(self):
         for p in self.player_guis.values():
+            self.grid_layout.removeWidget(p)
             p.close()
             p: PlayerGui
         self.player_guis.clear()
