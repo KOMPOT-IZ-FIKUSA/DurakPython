@@ -2,16 +2,13 @@ import threading
 
 import requests
 from PyQt5 import QtCore
-from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QSizePolicy, QWidget
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QWidget
 
 import const
 import log
 from card_index import Index
 from durak_qt_gui.cards_list_layout import CardsListLayout
-from durak_qt_gui.signal_handler import SignalHandler
-from qt_image_loader import load_cards
 
 
 class PlayerGui:
@@ -49,7 +46,7 @@ class PlayerGui:
             self.avatar.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             self.avatar.setMargin(10)
             self.name_and_icon_horizontal_layout.addWidget(self.avatar)
-            self.avatar.setPixmap(pixmap.scaled(64, 64))
+            self.avatar.setPixmap(pixmap.scaled(128, 128))
 
         def try_load_image():
             if player.avatar_link:

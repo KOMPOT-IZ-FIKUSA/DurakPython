@@ -105,7 +105,7 @@ class DurakSniffer:
         self.capture.start()
 
     def some_test(self):
-        print("-" * 100)
+        print('-' * 100)
         if self.game.data:
             for i in self.game.global_player_data:
                 user_data = self.game.global_player_data[i]
@@ -120,10 +120,10 @@ class DurakSniffer:
                 print(f"{name} | {cards}")
 
     def handle_client_packet(self, bytes_: bytes):
-        try:
-            self.some_test()
-        except Exception as e:
-            log.error(e)
+        #try:
+        #    self.some_test()
+        #except Exception as e:
+        #    log.error(e)
 
         self.recv_buf.write_bytes(bytes_)
         packet_str = self.recv_buf.read_packet()
@@ -283,8 +283,6 @@ class DurakSniffer:
             else:
                 handled = False
             if handled or not d.name:
-
-                print(d)
                 if self.game is not None and self.game.properties is not None:
                     pass
 
