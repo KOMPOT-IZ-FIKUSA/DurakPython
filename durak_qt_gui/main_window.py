@@ -40,7 +40,7 @@ class DurakMainWindow(QWidget):
         self.last_cards_set_time = 0
 
         self.sniffer.game.handle_event(events.SetGameProperties(GameProperties(0, 0, 0, 0, 0, 2, 6, 100, 0)))
-        self.sniffer.game.global_player_data[0] = GlobalPlayerData(123, "Лёха", 1, 1, None)
+        self.sniffer.game.global_player_data[0] = GlobalPlayerData(123, "Лёха", 1, 1, 'https://i.pinimg.com/originals/8a/de/fe/8adefe5af862b4f9cec286c6ee4722cb.jpg')
         self.sniffer.game.global_player_data[1] = GlobalPlayerData(456, "Гоха", 1, 1, None)
         self.sniffer.game.handle_event(events.GameStart())
         self.sniffer.game.handle_event(events.TakeFromDeckOrder([0, 0, 1]))
@@ -106,7 +106,7 @@ class DurakMainWindow(QWidget):
             w.show()
             return w
 
-        gui = PlayerGui(self, player, call_management_window)
+        gui = PlayerGui(self, player, call_management_window, self.signal_handler)
         pos = (column, row)
         self.grid_layout.addWidget(gui.container, row, column)
         self.player_guis[pos] = gui
