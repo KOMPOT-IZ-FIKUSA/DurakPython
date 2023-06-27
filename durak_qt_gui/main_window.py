@@ -1,19 +1,18 @@
-import random
 import threading
 import time
 
-from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QWidget, QGridLayout
+from PyQt5 import QtCore, QtGui
+from PyQt5.QtGui import QMovie, QFont
+from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel
 
 import const
 import events
 from card_index import Index
 from durak_qt_gui.card_management_window import CardManagementWindow
-from durak_sniffer import DurakSniffer
-from durak_qt_gui.players_layout_setting import PLAYERS_LAYOUT_SETTINGS
 from durak_qt_gui.player_gui import PlayerGui
+from durak_qt_gui.players_layout_setting import PLAYERS_LAYOUT_SETTINGS
 from durak_qt_gui.signal_handler import SignalHandler
-from game_data import DurakData
+from durak_sniffer import DurakSniffer
 from game_properties import GameProperties
 from player_data import GlobalPlayerData
 
@@ -24,16 +23,12 @@ class DurakMainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Durak Cheat")
+        self.setWindowIcon(QtGui.QIcon(const.logo_path))
         self.setFixedSize(QtCore.QSize(1300, 1000))
         self.grid_layout = QGridLayout(self)
         self.grid_layout.setSpacing(20)
-        self.setLayout(self.grid_layout)
 
-        backround_rect = QtWidgets.QLabel("", self)
-        backround_rect.setFixedSize(self.size())
-        backround_rect.setStyleSheet("background-color: #000;")
-
-
+        self.setup_boot_gui()
 
         self.signal_handler = SignalHandler(self.signal)
 
@@ -42,32 +37,75 @@ class DurakMainWindow(QWidget):
         self.sniffer = DurakSniffer()
         self.sniffer.game.add_event_handler(self.on_game_event)
 
-
         self.last_cards_set_time = 0
-
 
         self.sniffer.game.handle_event(events.SetGameProperties(GameProperties(0, 0, 0, 0, 0, 2, 6, 100, 0)))
         self.sniffer.game.global_player_data[0] = GlobalPlayerData(123, "Лёха", 1, 1, None)
         self.sniffer.game.global_player_data[1] = GlobalPlayerData(456, "Гоха", 1, 1, None)
         self.sniffer.game.handle_event(events.GameStart())
-        self.sniffer.game.handle_event(events.TakeFromDeckOrder([0, 0, 0, 0, 1, 1, 1, 1]))
+        self.sniffer.game.handle_event(events.TakeFromDeckOrder([0, 0, 1]))
         self.sniffer.game.handle_event(events.Hand([
-            Index(0, 9, 6),
-            Index(0, 8, 6),
-            Index(1, 8, 6),
-            Index(1, 9, 6),
+          Index(0, 9, 6),
+          Index(0, 8, 6),
         ]))
 
+        def f():
+            time.sleep(5)
+            self.sniffer.game.handle_event(events.GameOver())
+
+        threading.Thread(target=f).start()
+
         self.show()
-        self.sniffer.start()
+        #self.sniffer.start()
 
+    def setup_boot_gui(self):
+        self.background_rect = QLabel("", self)
+        self.background_rect.setFixedSize(self.size())
+        self.background_rect.setStyleSheet("background-color: #FFFFFF")
 
+        self.loading_animation_label = QLabel(self)
+        self.loading_animation_label.setGeometry(0, 0, 200, 200)
+
+        self.animation_movie = QMovie("data\\анимация_загрузки.gif")
+        self.loading_animation_label.setMovie(self.animation_movie)
+
+        self.animation_movie.start()
+
+        self.text_label = QLabel('Ожидание начала игры', self)
+        self.text_label.setFont(QFont('Arial', 30))
+
+        self.text_label.setGeometry(0, 0, 500, 100)
+
+        self.text_label.move(
+            (
+                    self.size().width() // 2) - self.text_label.size().width() // 2 + self.loading_animation_label.size().width() // 2,
+            (self.size().height() // 2) - self.text_label.size().height())
+        self.loading_animation_label.move(
+            (
+                    self.size().width() // 2) - self.loading_animation_label.size().width() // 2 - self.text_label.size().width() // 2,
+            (self.size().height() // 2) - (self.loading_animation_label.size().height() // 2) - 50)
+
+        self.setLayout(self.grid_layout)
+
+        self.main_background_rect = QLabel("", self)
+        self.main_background_rect.setFixedSize(self.size())
+
+        self.hide_boot_gui(False)
+
+    def hide_boot_gui(self, delete_later):
+        if not delete_later:
+            self.main_background_rect.setStyleSheet("background-color: transparent;")
+        else:
+            self.main_background_rect.setStyleSheet("background-color: #000;")
 
     def create_player_gui(self, column, row, player_pos, player: GlobalPlayerData):
+
+        self.hide_boot_gui(True)
         def call_management_window():
             w = CardManagementWindow(self.sniffer.game.data, player_pos)
             w.show()
             return w
+
         gui = PlayerGui(self, player, call_management_window)
         pos = (column, row)
         self.grid_layout.addWidget(gui.container, row, column)
@@ -77,11 +115,12 @@ class DurakMainWindow(QWidget):
         return gui
 
     def close_all_player_guis(self):
+        self.hide_boot_gui(False)
         for p in self.player_guis.values():
-            self.grid_layout.removeWidget(p)
             p.close()
             p: PlayerGui
         self.player_guis.clear()
+
 
     def on_game_event(self, event):
         if isinstance(event, events.GameStart):
@@ -92,6 +131,9 @@ class DurakMainWindow(QWidget):
                 column, row = setting.setting[player_index]
                 player_data: GlobalPlayerData = self.sniffer.game.global_player_data[player_index]
                 self.signal_handler.add(self.create_player_gui, column, row, player_index, player_data)
+            self.signal_handler.emit()
+        if isinstance(event, events.GameOver):
+            self.signal_handler.add(self.close_all_player_guis)
             self.signal_handler.emit()
 
         self.set_cards_safely()
@@ -119,7 +161,8 @@ class DurakMainWindow(QWidget):
                 red_cards = []
                 black_cards = []
                 for suit_index, suit in enumerate(const.suits):
-                    cards = [Index(suit_index, i + min_rank, min_rank) for i in range(ranks_count) if player_cards_container.probs[suit_index, i] > 0.9999]
+                    cards = [Index(suit_index, i + min_rank, min_rank) for i in range(ranks_count) if
+                             player_cards_container.probs[suit_index, i] > 0.9999]
                     if suit_index in const.red_suits_indices:
                         red_cards += cards
                     else:
@@ -129,9 +172,13 @@ class DurakMainWindow(QWidget):
                 gui = self.player_guis[setting.setting[player_index]]
                 gui.red_cards.set_cards(red_cards)
                 gui.black_cards.set_cards(black_cards)
+
         def f():
             time.sleep(1)
             if self.sniffer.game.game_running():
                 self.signal_handler.add(self.set_cards_unsafely)
                 self.signal_handler.emit()
+
         threading.Thread(target=f).start()
+
+
