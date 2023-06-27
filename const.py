@@ -56,7 +56,8 @@ modes_phrases = {
     8: "кроется, покрыто",
     9: "кроется, не покрыто",
 }
-SERVER_IP = "cc:32:e5:33:58:e8"
+#cc:32:e5:33:58:e8
+SERVER_IP = "84:c9:b2:52:e1:1f"
 
 max_time_between_hand_and_order_event = 2
 

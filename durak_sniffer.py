@@ -2,7 +2,6 @@ import json
 import time
 import traceback
 
-
 from scapy.all import AsyncSniffer
 
 from scapy.layers.inet import TCP
@@ -24,7 +23,6 @@ def load_json(string):
     except json.JSONDecodeError:
         error("durak_sniffer.py", "load_json", string)
         return {}
-
 
 
 class NamedDict(dict):
@@ -63,6 +61,7 @@ class Buffer:
     b = '}'.encode("utf-8")
     c = '\n'.encode("utf-8")
     bc = b + c
+
     def __init__(self):
         self.bytes_ = None
 
@@ -73,7 +72,6 @@ class Buffer:
         else:
             self.bytes_ += bytes_
 
-
     def read_packet(self):
         if self.c in self.bytes_ and self.a in self.bytes_:
             if self.bytes_.index(self.c) < self.bytes_.index(self.a):  # strings like "abc\ndef{\"value\": 1}\n"
@@ -83,12 +81,12 @@ class Buffer:
                     return self.read_packet()
                 else:
                     s = self.bytes_[:i].decode("utf-8", errors="replace")
-                    self.bytes_ = self.bytes_[i+1:]
+                    self.bytes_ = self.bytes_[i + 1:]
                     return s
         if self.bc in self.bytes_:
             i = self.bytes_.index(self.bc)
-            s = self.bytes_[:i+1].decode("utf-8", errors="replace")
-            self.bytes_ = self.bytes_[i+1:]
+            s = self.bytes_[:i + 1].decode("utf-8", errors="replace")
+            self.bytes_ = self.bytes_[i + 1:]
             while s[0] == "\n":
                 s = s[1:]
             return s
@@ -106,7 +104,6 @@ class DurakSniffer:
     def start(self):
         self.capture.start()
 
-
     def some_test(self):
         print("-" * 100)
         if self.game.data:
@@ -121,7 +118,6 @@ class DurakSniffer:
                 for card in self.game.data.players[i].probs_container.get_known_existing_cards_indices():
                     cards += card.to_compact_string() + " "
                 print(f"{name} | {cards}")
-
 
     def handle_client_packet(self, bytes_: bytes):
         try:
@@ -223,14 +219,15 @@ class DurakSniffer:
                 pass
             elif d.name == "chs":
                 cards_to_players = d["c"]
-                cards_to_players = {self.card_from_string(card): player_index for card, player_index in cards_to_players.items()}
+                cards_to_players = {self.card_from_string(card): player_index for card, player_index in
+                                    cards_to_players.items()}
                 self.game.handle_event(events.ShaperBack(cards_to_players))
             elif d.name == "gd":
                 pass
             elif d.name == "g":
                 pass
             elif d.name == "game_over":
-                self.game.handle_event(events.GameStop())
+                self.game.handle_event(events.GameOver())
             elif d.name == "bets":
                 pass
             elif d.name == "server":
@@ -298,7 +295,6 @@ class DurakSniffer:
             else:
                 d.name = d.name[1:]
 
-
     def handle_hand_packet(self, d: NamedDict):
         hand_cards = d["cards"]
         if self.game.properties is None:
@@ -360,6 +356,8 @@ class DurakSniffer:
                 pass
             elif d.name == "chb":
                 pass
+            elif d.name == 'game_over':
+                self.game.handle_event(events.GameOver())
             else:
                 log.error("client-server packet name error", d)
 
@@ -383,8 +381,11 @@ class DurakSniffer:
                     self.handle_client_packet(bytes_)
                 elif dst == SERVER_IP:
                     self.handle_server_packet(bytes_)
+                else:
+                    log.error('ДОЛБАЕБ! ПРОВЕРЬ SERVER_IP')
         except Exception as e:
             error(self.callback, traceback.format_exc(5), src=src, dst=dst, bytes_=bytes_)
+
 
 if __name__ == "__main__":
     DurakSniffer().start()

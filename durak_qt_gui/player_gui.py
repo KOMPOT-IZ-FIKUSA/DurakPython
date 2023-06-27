@@ -42,13 +42,14 @@ class PlayerGui:
         self.main_vertical_layout.setStretch(1, 2)
         self.main_vertical_layout.setStretch(2, 2)
 
+        self.avatar = QLabel()
+        self.avatar.setStyleSheet("color: #000; font-weight: bold; font-size: 30pt")
+        self.avatar.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.avatar.setMargin(10)
+        self.name_and_icon_horizontal_layout.addWidget(self.avatar)
+
         def try_load_image():
             if player.avatar_link:
-                self.avatar = QLabel()
-                self.avatar.setStyleSheet("color: #000; font-weight: bold; font-size: 30pt")
-                self.avatar.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-                self.avatar.setMargin(10)
-                self.name_and_icon_horizontal_layout.addWidget(self.avatar)
                 try:
                     image = QImage()
                     image.loadFromData(requests.get(player.avatar_link).content)

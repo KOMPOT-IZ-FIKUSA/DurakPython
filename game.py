@@ -5,7 +5,7 @@ from time import perf_counter
 import const
 import log
 from card_index import Index
-from events import GameStart, GameStop, SetTrumpCard, SetTrumpSuit, Attack, SetModes, Defence, Redirect, EndTurn, Hand, \
+from events import GameStart, GameOver, SetTrumpCard, SetTrumpSuit, Attack, SetModes, Defence, Redirect, EndTurn, Hand, \
     TakeFromDeckOrder, AttackCanceled, RedirectCanceled, DefenceCanceled, GameReset, SetGameProperties, \
     ShaperBack, MoveSelfToPos
 from game_data import DurakData
@@ -93,6 +93,10 @@ class Durak:
             self.handle_turn_end(event)
 
         elif isinstance(event, GameReset):
+            self.hand_event_in_queue = None
+            self.player_modes = None
+            self.data = None
+        elif isinstance(event, GameOver):
             self.hand_event_in_queue = None
             self.player_modes = None
             self.data = None

@@ -39,7 +39,7 @@ class GameStart:
     pass
 
 @dataclass
-class GameStop:
+class GameOver:
     pass
 
 @dataclass
