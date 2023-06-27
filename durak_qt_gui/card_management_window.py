@@ -3,7 +3,6 @@ from PyQt5.QtCore import QEvent
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGridLayout, QHBoxLayout, QPushButton
 
 import log
-import const
 from card_index import Index
 from durak_qt_gui import card_label_widget
 from durak_qt_gui.card_label_widget import CardLabel
@@ -15,10 +14,11 @@ class CardManagementWindow(QWidget):
 
     def __init__(self, game_data: DurakData, player_pos: int):
         super().__init__()
-        self.main_vertical_layout = None
-        self.grid_layout = None
-        self.horizontal_layout = None
         self.confirm_button = None
+        self.horizontal_layout = None
+        self.grid_layout = None
+        self.main_vertical_layout = None
+
         self.game_data = game_data
         self.player_pos = player_pos
         self.min_rank = game_data.get_min_card_rank()
@@ -34,27 +34,33 @@ class CardManagementWindow(QWidget):
 
         self.show()
 
-    def set_card_background_to_green_if_selected(self, label: CardLabel):
-        if label.selected:
+    def set_card_background_to_green_if_probability_is_different_from_initial(self, label: CardLabel):
+        initial = self.game_data.players[self.player_pos].probs_container.get(label.card)
+        if abs(label.probability - initial) > 0.0001:
             label.custom_background = card_label_widget.BackgroundColor.GREEN
         else:
             label.custom_background = card_label_widget.BackgroundColor.NONE
 
     def set_up_layouts(self):
         self.setWindowTitle("Card Manager")
-        self.setWindowIcon(QtGui.QIcon(const.logo_path))
-        self.setFixedWidth(136 * self.ranks_count)
+        path = 'data\\durak_logo.png'
+        self.setWindowIcon(QtGui.QIcon(path))
+        self.setFixedWidth(136 * int(self.ranks_count))
         self.setFixedHeight(800)
+
         self.main_vertical_layout = QVBoxLayout(self)
         self.grid_layout = QGridLayout(self)
+
         self.horizontal_layout = QHBoxLayout(self)
         self.main_vertical_layout.addLayout(self.grid_layout)
         self.main_vertical_layout.addLayout(self.horizontal_layout)
+
         self.confirm_button = QPushButton(self)
         self.confirm_button.setFixedHeight(64)
         self.confirm_button.setStyleSheet("font-size: 32px; font-weight: bold;")
         self.confirm_button.setText("OK")
         self.confirm_button.clicked.connect(self.on_confirm_button_clicked)
+
         self.main_vertical_layout.addWidget(self.confirm_button)
         self.setLayout(self.main_vertical_layout)
 
@@ -71,7 +77,6 @@ class CardManagementWindow(QWidget):
                 self.cards_labels[suit_index][rank_value] = label
                 self.grid_layout.addWidget(label, suit_index, rank_index)
 
-
     def eventFilter(self, object, event):
         if isinstance(object, CardLabel):
             if event.type() == QEvent.MouseButtonRelease:
@@ -80,16 +85,15 @@ class CardManagementWindow(QWidget):
                     object.click_left()
                 elif button == 2:
                     object.click_right()
-                self.set_card_background_to_green_if_selected(object)
+                self.set_card_background_to_green_if_probability_is_different_from_initial(object)
         return False
-
 
     def on_confirm_button_clicked(self):
         probs = self.game_data.players[self.player_pos].probs_container
         changes_queue = []
         for suit_index, ranks in self.cards_labels.items():
             for rank_index, label in ranks.items():
-                if label.selected and abs(probs.get(label.card) - label.probability) > 0.0001:
+                if abs(probs.get(label.card) - label.probability) > 0.0001:
                     changes_queue.append([label.card, label.probability])
         for index, value in changes_queue:
             try:

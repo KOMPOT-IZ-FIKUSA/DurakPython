@@ -39,24 +39,47 @@ class DurakMainWindow(QWidget):
 
         self.last_cards_set_time = 0
 
-        #self.sniffer.game.handle_event(events.SetGameProperties(GameProperties(0, 0, 0, 0, 0, 2, 6, 100, 0)))
-        #self.sniffer.game.global_player_data[0] = GlobalPlayerData(123, "Лёха", 1, 1, 'https://i.pinimg.com/originals/8a/de/fe/8adefe5af862b4f9cec286c6ee4722cb.jpg')
-        #self.sniffer.game.global_player_data[1] = GlobalPlayerData(456, "Гоха", 1, 1, None)
-        #self.sniffer.game.handle_event(events.GameStart())
-        #self.sniffer.game.handle_event(events.TakeFromDeckOrder([0, 0, 1]))
-        #self.sniffer.game.handle_event(events.Hand([
-        #  Index(0, 9, 6),
-        #  Index(0, 8, 6),
-        #]))
-
+        self.sniffer.game.handle_event(events.SetGameProperties(GameProperties(0, 0, 0, 0, 0, 2, 6, 100, 0)))
+        self.sniffer.game.global_player_data[0] = GlobalPlayerData(123, "Лёха", 1, 1, 'https://i.pinimg.com/originals/8a/de/fe/8adefe5af862b4f9cec286c6ee4722cb.jpg')
+        self.sniffer.game.global_player_data[1] = GlobalPlayerData(456, "Гоха", 1, 1, None)
+        self.sniffer.game.handle_event(events.GameStart())
+        self.sniffer.game.handle_event(events.TakeFromDeckOrder([0, 0,0,0,0,0,0,0,0,0,0, 1]))
+        self.sniffer.game.handle_event(events.Hand([
+            Index(3, 6, 6),
+            Index(3, 7, 6),
+            #Index(3, 8, 6),
+            #Index(3, 9, 6),
+            #Index(3, 10, 6),
+            #Index(3, 11, 6),
+            #Index(3, 12, 6),
+            #Index(3, 13, 6),
+            #Index(3, 14, 6),
+            Index(1, 9, 6),
+            Index(1, 8, 6),
+            Index(1, 7, 6),
+            #Index(1, 6, 6),
+            Index(1, 10, 6),
+            Index(1, 11, 6),
+            #Index(1, 12, 6),
+            Index(1, 13, 6),
+            Index(1, 14, 6),
+            #Index(0, 9, 6),
+            #Index(0, 8, 6),
+            Index(0, 7, 6),
+            #Index(0, 6, 6),
+            Index(0, 10, 6),
+            #Index(0, 11, 6),
+            #Index(0, 12, 6),
+            #Index(0, 13, 6),
+            #Index(0, 14, 6),
+        ]))
         #def f():
         #    time.sleep(5)
         #    self.sniffer.game.handle_event(events.GameOver())
-
         #threading.Thread(target=f).start()
 
         self.show()
-        self.sniffer.start()
+        #self.sniffer.start()
 
     def setup_boot_gui(self):
         self.background_rect = QLabel("", self)
@@ -151,34 +174,36 @@ class DurakMainWindow(QWidget):
             self.last_cards_set_time = time.perf_counter()
 
     def set_cards_unsafely(self):
-        game = self.sniffer.game
-        if game.game_running():
-            players_count = game.properties.players_count
-            min_rank = game.properties.lowest_card_rank
-            ranks_count = 15 - min_rank
-            for player_index in range(game.properties.players_count):
-                player_cards_container = game.data.players[player_index].probs_container
-                red_cards = []
-                black_cards = []
-                for suit_index, suit in enumerate(const.suits):
-                    cards = [Index(suit_index, i + min_rank, min_rank) for i in range(ranks_count) if
-                             player_cards_container.probs[suit_index, i] > 0.9999]
-                    if suit_index in const.red_suits_indices:
-                        red_cards += cards
-                    else:
-                        black_cards += cards
+        try:
+            game = self.sniffer.game
+            if game.game_running():
+                players_count = game.properties.players_count
+                min_rank = game.properties.lowest_card_rank
+                ranks_count = 15 - min_rank
+                for player_index in range(game.properties.players_count):
+                    player_cards_container = game.data.players[player_index].probs_container
+                    red_cards = []
+                    black_cards = []
+                    for suit_index, suit in enumerate(const.suits):
+                        cards = [Index(suit_index, i + min_rank, min_rank) for i in range(ranks_count) if
+                                 player_cards_container.probs[suit_index, i] > 0.9999]
+                        if suit_index in const.red_suits_indices:
+                            red_cards += cards
+                        else:
+                            black_cards += cards
 
-                setting = PLAYERS_LAYOUT_SETTINGS[players_count]
-                gui = self.player_guis[setting.setting[player_index]]
-                gui.red_cards.set_cards(red_cards)
-                gui.black_cards.set_cards(black_cards)
+                    setting = PLAYERS_LAYOUT_SETTINGS[players_count]
+                    gui = self.player_guis[setting.setting[player_index]]
+                    gui.red_cards.set_cards(red_cards)
+                    gui.black_cards.set_cards(black_cards)
+            def f():
+                time.sleep(1)
+                if self.sniffer.game.game_running():
+                    self.signal_handler.add(self.set_cards_unsafely)
+                    self.signal_handler.emit()
 
-        def f():
-            time.sleep(1)
-            if self.sniffer.game.game_running():
-                self.signal_handler.add(self.set_cards_unsafely)
-                self.signal_handler.emit()
-
-        threading.Thread(target=f).start()
+            threading.Thread(target=f).start()
+        except Exception as e:
+            print(e)
 
 

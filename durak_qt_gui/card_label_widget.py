@@ -22,13 +22,13 @@ class BackgroundColor(enum.Enum):
 
 class CardLabel(QLabel):
     shirt_svg_renderer = None
-    shirt_svg_path = "data\\cards_svg\\shirt.svg"
+    shirt_svg_path = "data\\new_cards_svg\\shirt.svg"
 
     def __init__(self, window, card: Index, initial_probability: float):
         super().__init__(window)
         suit_name = const.suit_names_for_java[const.suits[card.suit_i]].lower()
         rank_name = const.ranks_value_to_string[card.absolute]
-        svg_path = os.path.join("data\\cards_svg", f"{suit_name}_{rank_name}.svg")
+        svg_path = os.path.join("data\\new_cards_svg", f"{suit_name}_{rank_name}.svg")
 
         self.card_svg_renderer = QtSvg.QSvgRenderer(svg_path)
         if self.shirt_svg_renderer is None:
