@@ -5,7 +5,7 @@ from time import perf_counter
 import const
 import log
 from card_index import Index
-from events import GameStart, SetTrumpCard, SetTrumpSuit, Attack, SetModes, Defence, Redirect, EndTurn, Hand, \
+from events import GameStart, GameStop, SetTrumpCard, SetTrumpSuit, Attack, SetModes, Defence, Redirect, EndTurn, Hand, \
     TakeFromDeckOrder, AttackCanceled, RedirectCanceled, DefenceCanceled, GameReset, SetGameProperties, \
     ShaperBack, MoveSelfToPos
 from game_data import DurakData

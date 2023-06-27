@@ -230,7 +230,7 @@ class DurakSniffer:
             elif d.name == "g":
                 pass
             elif d.name == "game_over":
-                pass
+                self.game.handle_event(events.GameStop())
             elif d.name == "bets":
                 pass
             elif d.name == "server":

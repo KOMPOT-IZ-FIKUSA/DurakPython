@@ -1,22 +1,24 @@
-import logging
-
-import numpy as np
-from PyQt5 import QtCore
-from PyQt5.QtCore import QPropertyAnimation, QEasingCurve, QPoint, QEvent
+from PyQt5 import QtCore, QtGui
+from PyQt5.QtCore import QEvent
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGridLayout, QHBoxLayout, QPushButton
 
 import log
+import const
 from card_index import Index
 from durak_qt_gui import card_label_widget
+from durak_qt_gui.card_label_widget import CardLabel
 from durak_qt_gui.card_slide_animation import CardSlideAnimation
 from game_data import DurakData
-from durak_qt_gui.card_label_widget import CardLabel
 
 
 class CardManagementWindow(QWidget):
 
     def __init__(self, game_data: DurakData, player_pos: int):
         super().__init__()
+        self.main_vertical_layout = None
+        self.grid_layout = None
+        self.horizontal_layout = None
+        self.confirm_button = None
         self.game_data = game_data
         self.player_pos = player_pos
         self.min_rank = game_data.get_min_card_rank()
@@ -40,6 +42,7 @@ class CardManagementWindow(QWidget):
 
     def set_up_layouts(self):
         self.setWindowTitle("Card Manager")
+        self.setWindowIcon(QtGui.QIcon(const.logo_path))
         self.setFixedWidth(136 * self.ranks_count)
         self.setFixedHeight(800)
         self.main_vertical_layout = QVBoxLayout(self)

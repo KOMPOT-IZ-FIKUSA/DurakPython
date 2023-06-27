@@ -59,3 +59,5 @@ modes_phrases = {
 SERVER_IP = "cc:32:e5:33:58:e8"
 
 max_time_between_hand_and_order_event = 2
+
+logo_path = 'data\\durak_logo.png'

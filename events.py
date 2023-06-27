@@ -38,6 +38,9 @@ class Hand:
 class GameStart:
     pass
 
+@dataclass
+class GameStop:
+    pass
 
 @dataclass
 class SetModes:
