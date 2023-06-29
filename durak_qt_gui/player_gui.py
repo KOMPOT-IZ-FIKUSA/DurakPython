@@ -3,32 +3,37 @@ import threading
 import requests
 from PyQt5 import QtCore
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QWidget
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QWidget, QSizePolicy, QScrollArea
 
 import const
 import log
 from card_index import Index
 from durak_qt_gui.cards_list_layout import CardsListLayout
+from player_data import GlobalPlayerData
 
 
 class PlayerGui:
-    def __init__(self, window, player, enter_card_edit_mode, signal_handler):
-        self.container = QLabel()
+    def __init__(self, window, player: GlobalPlayerData, enter_card_edit_mode, signal_handler):
+        self.container = QWidget(window)
+        p = QSizePolicy.Policy.MinimumExpanding
+        self.container.setSizePolicy(p, p)
         self.container.setStyleSheet("background-color: #ccc")
-
         self.window = window
         self.main_vertical_layout = QVBoxLayout(self.container)
-        self.main_vertical_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_vertical_layout.setContentsMargins(10, 10, 10, 10)
         self.main_vertical_layout.setSpacing(0)
 
-        self.name_and_icon_horizontal_layout = QHBoxLayout(window)
+        self.name_and_icon_horizontal_layout = QHBoxLayout(self.container)
 
-        self.name = QLabel(player.name, window)
-        self.name.setStyleSheet("color: #000; font-weight: bold; font-size: 30pt")
+        self.name = QLabel(player.name, self.container)
+        self.name.setStyleSheet("color: #000; font-weight: bold; font-size: 30pt;")
         self.name.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.name.setSizePolicy(p, p)
 
         self.black_cards = CardsListLayout(window)
+        self.black_cards.set_cards_size_policy(p, p)
         self.red_cards = CardsListLayout(window)
+        self.red_cards.set_cards_size_policy(p, p)
 
         self.name_and_icon_horizontal_layout.addWidget(self.name)
         self.main_vertical_layout.addLayout(self.name_and_icon_horizontal_layout)

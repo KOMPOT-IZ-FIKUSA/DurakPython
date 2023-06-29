@@ -13,7 +13,7 @@ class CardSlideAnimation(QObject):
         self.animation.setDuration(600)
         self.animation.setEasingCurve(QEasingCurve.OutBounce)
         self.animation.setEndValue(QPoint(card.x(), card.initial_y + delta))
-        self.animation.start()
+        self.animation.start(self.animation.DeleteWhenStopped)
         return self.animation
 
     def eventFilter(self, object, event):

@@ -1,9 +1,10 @@
+import random
 import threading
 import time
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtGui import QMovie, QFont
-from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel
+from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel, QHBoxLayout
 
 import const
 import events
@@ -26,7 +27,7 @@ class DurakMainWindow(QWidget):
         self.setWindowIcon(QtGui.QIcon(const.logo_path))
         self.setFixedSize(QtCore.QSize(1300, 1000))
         self.grid_layout = QGridLayout(self)
-        self.grid_layout.setSpacing(20)
+        self.grid_layout.setSpacing(10)
 
         self.setup_boot_gui()
 
@@ -39,49 +40,30 @@ class DurakMainWindow(QWidget):
 
         self.last_cards_set_time = 0
 
-        self.sniffer.game.handle_event(events.SetGameProperties(GameProperties(0, 0, 0, 0, 0, 2, 6, 100, 0)))
-        self.sniffer.game.global_player_data[0] = GlobalPlayerData(123, "Лёха", 1, 1, 'https://i.pinimg.com/originals/8a/de/fe/8adefe5af862b4f9cec286c6ee4722cb.jpg')
-        self.sniffer.game.global_player_data[1] = GlobalPlayerData(456, "Гоха", 1, 1, None)
+        # test avatar link 'https://i.pinimg.com/originals/8a/de/fe/8adefe5af862b4f9cec286c6ee4722cb.jpg'
+
+        #self.create_player_gui(0, 0, 0, GlobalPlayerData(123, "Очень длинное имя бля 1 2 3 4 5 6 7", 1, 1, 'https://i.pinimg.com/originals/8a/de/fe/8adefe5af862b4f9cec286c6ee4722cb.jpg'))
+        #self.create_player_gui(1, 0, 0, GlobalPlayerData(456, "Игрок 2", 1, 1, None))
+
+        self.sniffer.game.handle_event(events.SetGameProperties(GameProperties(0, 0, 0, 0, 0, 4, 6, 100, 0)))
+        self.sniffer.game.global_player_data[0] = GlobalPlayerData(123, "Игрок 1", 1, 1, None)
+        self.sniffer.game.global_player_data[1] = GlobalPlayerData(456, "Игрок 2", 1, 1, None)
+        self.sniffer.game.global_player_data[2] = GlobalPlayerData(1234, "Игрок 3", 1, 1, None)
+        self.sniffer.game.global_player_data[3] = GlobalPlayerData(4565, "Игрок 4", 1, 1, None)
         self.sniffer.game.handle_event(events.GameStart())
-        self.sniffer.game.handle_event(events.TakeFromDeckOrder([0] * 36))
-        self.sniffer.game.handle_event(events.Hand([
-            Index(0, 6, 6),
-            Index(0, 7, 6),
-            Index(0, 8, 6),
-            Index(0, 9, 6),
-            Index(0, 10, 6),
-            Index(0, 11, 6),
-            Index(0, 12, 6),
-            Index(0, 13, 6),
-            Index(0, 14, 6),
-            Index(1, 6, 6),
-            Index(1, 7, 6),
-            Index(1, 8, 6),
-            Index(1, 9, 6),
-            Index(1, 10, 6),
-            Index(1, 11, 6),
-            Index(1, 12, 6),
-            Index(1, 13, 6),
-            Index(1, 14, 6),
-            Index(2, 6, 6),
-            Index(2, 7, 6),
-            Index(2, 8, 6),
-            Index(2, 9, 6),
-            Index(2, 10, 6),
-            Index(2, 11, 6),
-            Index(2, 12, 6),
-            Index(2, 13, 6),
-            Index(2, 14, 6),
-            Index(3, 6, 6),
-            Index(3, 7, 6),
-            Index(3, 8, 6),
-            Index(3, 9, 6),
-            Index(3, 10, 6),
-            Index(3, 11, 6),
-            Index(3, 12, 6),
-            Index(3, 13, 6),
-            Index(3, 14, 6),
-        ]))
+        N = 6
+        self.sniffer.game.handle_event(events.TakeFromDeckOrder([0] * 2 * N + [1] * 2 * N))
+        self_cards = []
+        enemy_cards = []
+        for i in range(6, 6 + N):
+            self_cards.append(Index(0, i, 6))
+            self_cards.append(Index(1, i, 6))
+            enemy_cards.append(Index(2, i, 6))
+            enemy_cards.append(Index(3, i, 6))
+        self.sniffer.game.handle_event(events.Hand(self_cards))
+        for card in enemy_cards[:2]:
+            self.sniffer.game.data.set_probability(self.sniffer.game.data.players[1].probs_container, card, 1)
+
         #def f():
         #    time.sleep(5)
         #    self.sniffer.game.handle_event(events.GameOver())
@@ -142,8 +124,9 @@ class DurakMainWindow(QWidget):
         pos = (column, row)
         self.grid_layout.addWidget(gui.container, row, column)
         self.player_guis[pos] = gui
-        self.grid_layout.setColumnStretch(column, 1000)
-        self.grid_layout.setRowStretch(row, 1000)
+        #self.grid_layout.setColumnStretch(column, 2)
+        #self.grid_layout.setRowStretch(row, 2)
+        #self.grid_layout.setColumnMinimumWidth(column, 100)
         return gui
 
     def close_all_player_guis(self):

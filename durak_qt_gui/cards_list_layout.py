@@ -21,6 +21,12 @@ class CardsListLayout(QHBoxLayout):
         self.group_animation = QParallelAnimationGroup()
         self.animation_event_filter = CardSlideAnimation(self, 20, self.group_animation)
 
+        self.size_policy = None
+
+    def set_cards_size_policy(self, w, h):
+        self.size_policy = (w, h)
+        for card in self.cards:
+            card.setSizePolicy(card)
 
     def __contains__(self, item):
         for card in self.cards:
@@ -51,7 +57,12 @@ class CardsListLayout(QHBoxLayout):
         if card in self:
             return
         label = CardLabel(self.window, card, 1)
+        if self.size_policy is not None:
+            label.setSizePolicy(*self.size_policy)
         label.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
+
+        self.group_animation.stop()
+
         label.installEventFilter(self.animation_event_filter)
         if side == "right":
             self.addWidget(label)

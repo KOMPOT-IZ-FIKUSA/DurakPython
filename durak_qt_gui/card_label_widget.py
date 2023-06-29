@@ -3,8 +3,9 @@ import math
 import os
 import random
 import time
+import typing
 
-from PyQt5 import QtSvg
+from PyQt5 import QtSvg, QtCore
 from PyQt5.QtCore import Qt, QRect, QSize, QRectF
 from PyQt5.QtGui import QPaintEvent, QPainter, QBrush, QColor, QFont, QPainterPath, QPen
 from PyQt5.QtWidgets import QLabel
@@ -46,6 +47,7 @@ class CardLabel(QLabel):
 
         self.custom_background = BackgroundColor.NONE
 
+
     def click_left(self):
         if self._left_clicked:
             self.probability = self.initial_probability
@@ -65,6 +67,7 @@ class CardLabel(QLabel):
             self._right_clicked = True
         self._left_clicked = False
         self.update()
+
 
     @property
     def probability(self):
