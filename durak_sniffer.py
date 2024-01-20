@@ -380,7 +380,7 @@ class DurakSniffer:
                 elif dst == SERVER_IP:
                     self.handle_server_packet(bytes_)
                 else:
-                    log.error('ДОЛБАЕБ! ПРОВЕРЬ SERVER_IP')
+                    log.error('Error! Check SERVER_IP')
         except Exception as e:
             error(self.callback, traceback.format_exc(5), src=src, dst=dst, bytes_=bytes_)
 

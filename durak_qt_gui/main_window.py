@@ -14,7 +14,6 @@ from durak_qt_gui.player_gui import PlayerGui
 from durak_qt_gui.players_layout_setting import PLAYERS_LAYOUT_SETTINGS
 from durak_qt_gui.signal_handler import SignalHandler
 from durak_sniffer import DurakSniffer
-from game_properties import GameProperties
 from player_data import GlobalPlayerData
 
 
@@ -39,38 +38,8 @@ class DurakMainWindow(QWidget):
         self.sniffer.game.add_event_handler(self.on_game_event)
 
         self.last_cards_set_time = 0
-
-        # test avatar link 'https://i.pinimg.com/originals/8a/de/fe/8adefe5af862b4f9cec286c6ee4722cb.jpg'
-
-        #self.create_player_gui(0, 0, 0, GlobalPlayerData(123, "Очень длинное имя бля 1 2 3 4 5 6 7", 1, 1, 'https://i.pinimg.com/originals/8a/de/fe/8adefe5af862b4f9cec286c6ee4722cb.jpg'))
-        #self.create_player_gui(1, 0, 0, GlobalPlayerData(456, "Игрок 2", 1, 1, None))
-
-        self.sniffer.game.handle_event(events.SetGameProperties(GameProperties(0, 0, 0, 0, 0, 4, 6, 100, 0)))
-        self.sniffer.game.global_player_data[0] = GlobalPlayerData(123, "Игрок 1", 1, 1, None)
-        self.sniffer.game.global_player_data[1] = GlobalPlayerData(456, "Игрок 2", 1, 1, None)
-        self.sniffer.game.global_player_data[2] = GlobalPlayerData(1234, "Игрок 3", 1, 1, None)
-        self.sniffer.game.global_player_data[3] = GlobalPlayerData(4565, "Игрок 4", 1, 1, None)
-        self.sniffer.game.handle_event(events.GameStart())
-        N = 6
-        self.sniffer.game.handle_event(events.TakeFromDeckOrder([0] * 2 * N + [1] * 2 * N))
-        self_cards = []
-        enemy_cards = []
-        for i in range(6, 6 + N):
-            self_cards.append(Index(0, i, 6))
-            self_cards.append(Index(1, i, 6))
-            enemy_cards.append(Index(2, i, 6))
-            enemy_cards.append(Index(3, i, 6))
-        self.sniffer.game.handle_event(events.Hand(self_cards))
-        for card in enemy_cards[:2]:
-            self.sniffer.game.data.set_probability(self.sniffer.game.data.players[1].probs_container, card, 1)
-
-        #def f():
-        #    time.sleep(5)
-        #    self.sniffer.game.handle_event(events.GameOver())
-        #threading.Thread(target=f).start()
-
         self.show()
-        #self.sniffer.start()
+        self.sniffer.start()
 
     def setup_boot_gui(self):
         self.background_rect = QLabel("", self)
